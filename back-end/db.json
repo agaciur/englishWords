@@ -7,12 +7,6 @@
       "id": 11
     },
     {
-      "word": "kot",
-      "translation": "cat",
-      "category": "noun",
-      "id": 12
-    },
-    {
       "word": "skakać",
       "translation": "jump",
       "category": "verb",
@@ -35,6 +29,12 @@
       "translation": "go",
       "category": "verb",
       "id": 16
+    },
+    {
+      "word": "owca",
+      "translation": "sheep",
+      "category": "noun",
+      "id": 17
     }
   ]
 }

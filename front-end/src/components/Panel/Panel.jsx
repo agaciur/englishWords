@@ -5,6 +5,8 @@ import { List } from "../List/List"
 import styles from "./Panel.module.css"
 import { Form } from "../Form/Form"
 
+const url = "http://localhost:3000/words"
+
 export function Panel() {
   const [data, setData] = useState([])
   const [isloading, setIsloading] = useState(true)
@@ -12,17 +14,24 @@ export function Panel() {
   const [category, setCategory] = useState(null)
 
   useEffect(() => {
-    const data = category === null ? "" : `?category=${category}`
-    fetch(`http://localhost:3000/words${data}`).then(response => {
+    let isCanceled = false
+    const params = category === null ? "" : `?category=${category}`
+
+    fetch(`${url}${params}`).then(response => {
       response.json().then(response => {
-        setData(response)
-        setIsloading(false)
+        if (!isCanceled) {
+          setData(response)
+          setIsloading(false)
+        }
       })
+      return () => {
+        isCanceled = true
+      }
     })
   }, [category])
 
   function handleFormSubmit(newItem) {
-    fetch("http://localhost:3000/words", {
+    fetch(url, {
       method: "POST",
       body: JSON.stringify(newItem),
       headers: {
@@ -36,7 +45,7 @@ export function Panel() {
   }
 
   function onDeleteClickButton(id) {
-    fetch(`http://localhost:3000/words/${id}`, {
+    fetch(`${url}/${id}`, {
       method: "DELETE",
     })
       .then(response => {
@@ -76,7 +85,7 @@ export function Panel() {
           <FilterButton
             active={category === "verb"}
             onClick={() => setCategory("verb")}>
-            Czsowniki
+            Czasowniki
           </FilterButton>
         </div>
 
