@@ -1,35 +1,46 @@
-import { useEffect, useState } from "react"
-import { ErrorMessage } from "../ErrorMessage/ErrorMessage"
+import { useEffect, useState, useMemo } from "react"
 import { FilterButton } from "../FilterButton/FilterButton"
 import { List } from "../List/List"
 import styles from "./Panel.module.css"
 import { Form } from "../Form/Form"
+import { getCategoryInfo } from '../../utils/getCategoryInfo'
+import { Info } from '../Info/Info'
 
 const url = "http://localhost:3000/words"
 
-export function Panel() {
+export function Panel({ showError }) {
   const [data, setData] = useState([])
   const [isloading, setIsloading] = useState(true)
-  const [error, setError] = useState(null)
   const [category, setCategory] = useState(null)
 
   useEffect(() => {
     let isCanceled = false
     const params = category === null ? "" : `?category=${category}`
 
-    fetch(`${url}${params}`).then(response => {
-      response.json().then(response => {
-        if (!isCanceled) {
-          setData(response)
-          setIsloading(false)
-        }
+    fetch(`${url}${params}`)
+        .then(response => {
+          if (response.ok) { 
+           return response.json() 
+          } 
+        throw new Error("Błąd podczas pobierania danych!")
       })
+      .then(response => {
+      
+          if (!isCanceled) {
+            setData(response)
+            setIsloading(false)
+          }
+      })
+      .catch(showError)
       return () => {
         isCanceled = true
       }
-    })
-  }, [category])
+    }, [category, showError])
 
+
+
+  const categoryInfo = useMemo(() => getCategoryInfo(category), [category])
+  
   function handleFormSubmit(newItem) {
     fetch(url, {
       method: "POST",
@@ -55,12 +66,7 @@ export function Panel() {
           throw new Error("Błąd podczas usuwania!")
         }
       })
-      .catch(e => {
-        setError(e.message)
-        setTimeout(() => {
-          setError(null)
-        }, 3000)
-      })
+      .catch(showError)
   }
 
   if (isloading) {
@@ -68,8 +74,9 @@ export function Panel() {
   }
   return (
     <>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+   
       <section className={styles.section}>
+        <Info>{categoryInfo}</Info>
         <Form handleFormSubmit={handleFormSubmit} />
         <div className={styles.filters}>
           <FilterButton
